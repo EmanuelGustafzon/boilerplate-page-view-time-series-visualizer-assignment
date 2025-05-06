@@ -26,30 +26,31 @@ def draw_line_plot():
     return fig
 
 def draw_bar_plot():
-    # Copy and modify data for monthly bar plot
-    df_bar = None
-
     # Draw bar plot
     gb = df.groupby([(df.index.year), (df.index.month)]).sum().reset_index(names=['year','month'])
-    gb['average'] = round(gb['value'] / pd.DatetimeIndex(pd.to_datetime(gb[['year', 'month']].assign(day=1))).days_in_month)
+    gb['average'] = gb['value'] / pd.DatetimeIndex(pd.to_datetime(gb[['year', 'month']].assign(day=1))).days_in_month
 
-    fig, ax = plt.subplots(layout='constrained')
-
-    years = np.sort(gb['year'].unique())
-    full_year_range = np.arange(gb['year'].min(), gb['year'].max() + 1)
-    months = np.sort(gb['month'].unique())
-
-    x = np.arange(len(gb['month'].unique()))
+    years = pd.Series(gb['year'].unique()).sort_values()
+    months = ['January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December']
     width = 0.8 / len(months) 
+    x = np.arange(len(years))
 
-    for i, month in enumerate(months):
-        data = gb.loc[(gb['month'] == month)].sort_values(by='year')
-        plt.bar(x + i * width, data['average'], width, label=month)
+    fig, ax = plt.subplots(figsize=(8, 6), layout='constrained')
 
-    plt.xticks(np.arange(len(gb['year'].unique())), years)
+    for m in range(12):
+        avg_month_views = []
+        for year in years:
+            if not gb[(gb['year'] == year) & (gb['month'] == m + 1)].empty:
+                avg_month_views.append(gb[(gb['year'] == year) & (gb['month'] == m + 1)]['average'].mean())
+            else:
+                avg_month_views.append(0)
+        ax.bar(x + m * width, avg_month_views, width=width, label=months[m])
+        
+    plt.xticks(x + width * (x / 2), years)
     plt.xlabel('Years')
     plt.ylabel('Average Page Views')
-    plt.legend(x, title='Months')
+    plt.legend(title='Months')
     # Save image and return fig (don't change this part)
     fig.savefig('bar_plot.png')
     return fig
