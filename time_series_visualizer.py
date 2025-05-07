@@ -59,6 +59,7 @@ draw_bar_plot()
 
 def draw_box_plot():
     # Prepare data for box plots (this part is done!)
+    df = df.copy()
     df.reset_index(inplace=True)
     df['date'] = pd.to_datetime(df['date'])
     df_box = df.copy()
@@ -69,9 +70,11 @@ def draw_box_plot():
     df_box['value'] = df_box['value'].apply(lambda x: np.float64(x))
     # Draw box plots (using Seaborn)
     fig, ax = plt.subplots(1, 2, figsize=(8, 6), layout='constrained')
-    sns.set_style("whitegrid")
+    sns.color_palette()
     sns.boxplot(x = df_box['year'], y = df_box['value'], ax= ax[0]) 
-    sns.boxplot(x = df_box['month'], y = df_box['value'], ax= ax[1]) 
+    sns.boxplot(x = df_box['month'], y = df_box['value'], 
+    groupby=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] 
+    ax= ax[1]) 
 
     # Save image and return fig (don't change this part)
     fig.savefig('box_plot.png')
